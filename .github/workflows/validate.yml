@@ -1,0 +1,121 @@
+name: Quality Gate - Validate Build
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Build Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run build test
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          echo "🔍 Verifying build artifacts..."
+
+          # Check if critical files exist
+          if [ ! -f "dist/index.html" ]; then
+            echo "❌ Missing dist/index.html"
+            exit 1
+          fi
+
+          if [ ! -f "dist/en/index.html" ]; then
+            echo "❌ Missing dist/en/index.html"
+            exit 1
+          fi
+
+          if [ ! -f "dist/de/index.html" ]; then
+            echo "❌ Missing dist/de/index.html"
+            exit 1
+          fi
+
+          echo "✅ All required HTML files generated"
+
+          # Check if build output contains proper content
+          if ! grep -q "Ruby" dist/en/index.html; then
+            echo "❌ English page missing 'Ruby' content"
+            exit 1
+          fi
+
+          if ! grep -q "Ruby" dist/de/index.html; then
+            echo "❌ German page missing 'Ruby' content"
+            exit 1
+          fi
+
+          echo "✅ Content validation passed"
+          echo "✅ Build is valid and ready for deployment!"
+
+      - name: Upload build artifacts for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: dist/
+          retention-days: 7
+
+  content-validation:
+    name: Content Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Markdown files
+        run: |
+          echo "📝 Validating content files..."
+
+          # Check if required content files exist
+          if [ ! -f "src/content/ruby/en.md" ]; then
+            echo "❌ Missing English content file"
+            exit 1
+          fi
+
+          if [ ! -f "src/content/ruby/de.md" ]; then
+            echo "❌ Missing German content file"
+            exit 1
+          fi
+
+          echo "✅ Content files exist"
+
+          # Check for required frontmatter
+          if ! grep -q "^title:" src/content/ruby/en.md; then
+            echo "❌ English content missing 'title' frontmatter"
+            exit 1
+          fi
+
+          if ! grep -q "^title:" src/content/ruby/de.md; then
+            echo "❌ German content missing 'title' frontmatter"
+            exit 1
+          fi
+
+          echo "✅ Frontmatter validation passed"
+
+          # Check for placeholder content that should be filled
+          if grep -q "\[Insert" src/content/ruby/en.md; then
+            echo "⚠️  Warning: English content has unfilled placeholders [Insert...]"
+          fi
+
+          if grep -q "\[.*hier einfügen\]" src/content/ruby/de.md; then
+            echo "⚠️  Warning: German content has unfilled placeholders"
+          fi
+
+          echo "✅ Content validation complete"

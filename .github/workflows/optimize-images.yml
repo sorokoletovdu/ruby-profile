@@ -1,0 +1,34 @@
+name: Optimize Images
+
+on:
+  push:
+    paths:
+      - 'public/raw/**'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install sharp
+
+      - name: Create output directory
+        run: mkdir -p public
+
+      - name: Optimize images
+        run: node scripts/optimize-images.js
+
+      - name: Commit optimized images
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "✨ Optimize uploaded images to WebP"
+          file_pattern: 'public/*.webp'

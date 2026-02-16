@@ -1,0 +1,46 @@
+---
+// This component runs at build time on the server
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+// 1. Generate static paths for all languages defined in config
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' }},
+    { params: { lang: 'de' }},
+  ];
+}
+
+const { lang } = Astro.params;
+
+// 2. Fetch correct markdown file based on lang param
+const rubyEntries = await getCollection('ruby');
+const entry = rubyEntries.find(e => e.slug === lang);
+
+if (!entry) {
+  throw new Error(`Could not find content for language: ${lang}`);
+}
+
+// 3. Render markdown to HTML
+const { Content } = await entry.render();
+
+// 4. Define toggle links
+const toggleLink = lang === 'en' ? '/de/' : '/en/';
+const toggleLabel = lang === 'en' ? 'Auf Deutsch wechseln 🇩🇪' : 'Switch to English 🇬🇧';
+---
+
+<Layout title={entry.data.title} lang={lang}>
+  <main class="container mx-auto px-4 py-8 max-w-2xl">
+    <!-- Language Toggle -->
+    <div class="flex justify-end mb-4">
+        <a href={toggleLink} class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm transition duration-150 ease-in-out">
+            {toggleLabel}
+        </a>
+    </div>
+
+    <!-- Markdown Content rendered here -->
+    <article class="prose prose-lg prose-img:rounded-xl prose-headings:underline mx-auto">
+        <Content />
+    </article>
+  </main>
+</Layout>

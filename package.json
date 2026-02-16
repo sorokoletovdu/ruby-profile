@@ -1,0 +1,20 @@
+{
+  "name": "ruby-profile",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "optimize-images": "node scripts/optimize-images.js",
+    "validate": "npm run build && npm run check-output",
+    "check-output": "test -f dist/en/index.html && test -f dist/de/index.html && echo '✅ Build validation passed!'",
+    "quality-gate": "npm run build && node scripts/validate-project.js"
+  },
+  "dependencies": {
+    "astro": "^4.16.0",
+    "@astrojs/tailwind": "^5.1.0",
+    "tailwindcss": "^3.4.0",
+    "sharp": "^0.33.0"
+  }
+}
