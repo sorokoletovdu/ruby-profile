@@ -24,8 +24,8 @@ if (!entry) {
 // 3. Render markdown to HTML
 const { Content } = await entry.render();
 
-// 4. Define toggle links
-const toggleLink = lang === 'en' ? '/de/' : '/en/';
+// 4. Define toggle links (with base path from config)
+const toggleLink = lang === 'en' ? `${import.meta.env.BASE_URL}/de/` : `${import.meta.env.BASE_URL}/en/`;
 const toggleLabel = lang === 'en' ? 'Auf Deutsch wechseln 🇩🇪' : 'Switch to English 🇬🇧';
 ---
 
