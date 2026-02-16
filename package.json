@@ -7,14 +7,18 @@
     "build": "astro build",
     "preview": "astro preview",
     "optimize-images": "node scripts/optimize-images.js",
+    "generate-qr": "node scripts/generate-qr-codes.js",
     "validate": "npm run build && npm run check-output",
     "check-output": "test -f dist/en/index.html && test -f dist/de/index.html && echo '✅ Build validation passed!'",
     "quality-gate": "npm run build && node scripts/validate-project.js"
   },
   "dependencies": {
-    "astro": "^5.17.2",
     "@astrojs/tailwind": "^5.1.0",
-    "tailwindcss": "^3.4.0",
-    "sharp": "^0.34.5"
+    "astro": "^5.17.2",
+    "sharp": "^0.34.5",
+    "tailwindcss": "^3.4.0"
+  },
+  "devDependencies": {
+    "qrcode": "^1.5.4"
   }
 }
